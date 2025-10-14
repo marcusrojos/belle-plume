@@ -88,7 +88,7 @@
             <td>{{ book.author }}</td>
             <td>{{ book.price }} FCFA</td>
             <td>
-              <a href="{% url 'admin_book_edit' book.id %}" class="btn btn-primary">Modifier</a>
+              <form method="post" action="{% url 'admin_book_edit' book.id %}" class="needs-confirm" data-message="Modifier le livre '{{ book.title }}' ?" style="display:inline">{% csrf_token %}<button type="submit">Modifier</button></form>
               <form method="post" action="{% url 'admin_book_delete' book.id %}" class="needs-confirm" data-message="Supprimer le livre '{{ book.title }}' ?" style="display:inline">{% csrf_token %}<button type="submit">Supprimer</button></form>
             </td>
           </tr>

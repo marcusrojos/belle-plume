@@ -1,0 +1,244 @@
+/* Style global pour base.html : couleurs et structure de base */
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  margin: 0;
+  background: #fdfaf6;
+  color: #333;
+}
+header {
+  background: #6B2F2F;
+  color: white;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+header .brand {
+  color: white;
+  text-decoration: none;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+}
+header .brand:hover { background: rgba(255,255,255,0.12); }
+nav {
+  display: flex;
+  align-items: center;
+}
+
+.header-left { display:flex; align-items:center; gap:12px; justify-content: space-between; width: 100%; position: relative; }
+.menu-toggle { margin-left: auto; }
+.header-right { display:flex; align-items:center; gap:16px; }
+.cart-badge .cart-link { color: white; text-decoration: none; font-weight: bold; }
+.cart-badge #cart-count { background:#FFD700; color:#333; padding:2px 8px; border-radius:12px; margin-left:6px; }
+nav a {
+  color: white;
+  margin-left: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+.cart-badge .cart-link:hover{
+  color: #FFD700;
+}
+nav a:hover {
+  color: #FFD700;
+}
+main {
+  min-height: 70vh;
+  padding: 30px 0 0 0;
+}
+a { text-decoration: none; }
+
+/* Ensure the header brand link isn't blue/underlined (browser default). Keep accessible focus. */
+.brand, .brand:link, .brand:visited {
+  color: white !important;
+  text-decoration: none !important;
+}
+.brand:hover, .brand:active {
+  color: #FFD700 !important; /* subtle accent on hover */
+  text-decoration: none !important;
+}
+.brand:focus {
+  outline: 3px solid rgba(255,215,0,0.25);
+  outline-offset: 3px;
+}
+
+/* Make nav links consistent: white, no underline, accessible focus */
+nav a, nav a:link, nav a:visited {
+  color: white !important;
+  text-decoration: none !important;
+}
+nav a:hover, nav a:active {
+  color: #FFD700 !important;
+  text-decoration: none !important;
+}
+nav a:focus {
+  outline: 3px solid rgba(255,215,0,0.18);
+  outline-offset: 3px;
+}
+
+/* Responsive navigation: on small screens hide nav links and show a toggle button */
+/* Desktop: keep existing horizontal nav */
+.menu-toggle {
+  display: none; /* hidden on desktop */
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.08);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+  header { padding: 12px 16px; position: relative; }
+  header h1 { font-size: 20px; }
+  .menu-toggle { display: inline-flex; align-items:center; justify-content:center; position: fixed; right: 16px; top: 50%; transform: translateY(-50%); z-index: 100; }
+  /* hide nav by default on small screens */
+  .main-nav { display: none; position: absolute; top: 64px; right: 16px; background: #6B2F2F; padding: 12px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); z-index: 50; }
+  .main-nav.open { display: block; }
+  .main-nav a { display: block; margin: 8px 0; }
+  nav a { margin-left: 0; }
+}
+
+/* Slight layout tweak for very small screens */
+@media (max-width: 420px) {
+  header { padding: 10px 12px; }
+  .menu-toggle { font-size: 18px; padding: 6px 8px; }
+  .main-nav { right: 8px; left: 8px; top: 56px; }
+}
+
+/* Device-specific styles */
+.device-mobile {
+  /* Mobile-specific optimizations */
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.device-tablet {
+  /* Tablet-specific optimizations */
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.device-desktop {
+  /* Desktop-specific optimizations */
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 768px) {
+  .device-mobile header {
+    padding: 12px 16px;
+  }
+
+  .device-mobile header h1 {
+    font-size: 20px;
+  }
+
+  .device-mobile .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .device-mobile .main-nav {
+    display: none;
+    position: absolute;
+    top: 64px;
+    right: 16px;
+    background: #6B2F2F;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    z-index: 50;
+  }
+
+  .device-mobile header {
+    position: relative;
+  }
+
+  .device-mobile .main-nav.open {
+    display: block;
+  }
+
+  .device-mobile .main-nav a {
+    display: block;
+    margin: 8px 0;
+  }
+
+  .device-mobile nav a {
+    margin-left: 0;
+  }
+}
+
+/* Tablet-specific adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .device-tablet header {
+    padding: 15px 30px;
+  }
+
+  .device-tablet header h1 {
+    font-size: 22px;
+  }
+
+  .device-tablet .menu-toggle {
+    display: none;
+  }
+
+  .device-tablet .main-nav {
+    display: flex !important;
+    position: static;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  .device-desktop header {
+    padding: 15px 40px;
+  }
+
+  .device-desktop header h1 {
+    font-size: 24px;
+  }
+
+  .device-desktop .menu-toggle {
+    display: none;
+  }
+
+  .device-desktop .main-nav {
+    display: flex !important;
+    position: static;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+  }
+}
+
+/* Cart badge */
+#cart-badge #cart-count {
+  background: #FFD700;
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left:6px;
+}
+
+/* Toast notifications */
+#toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+.toast { background: rgba(0,0,0,0.85); color: white; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); opacity: 0; transform: translateY(-10px); transition: opacity 0.25s, transform 0.25s; }
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* Menu slide animation */
+.main-nav { transition: transform 0.25s ease, opacity 0.25s ease; }
+.main-nav.open { transform-origin: top right; }

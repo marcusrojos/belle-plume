@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Modifier le livre - Ma Librairie{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+{% block content %}
+<div class="admin-root">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>📚 Admin</h2>
+    <a href="{% url 'admin_dashboard' %}"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="{% url 'admin_users' %}"><i class="fa fa-users"></i> Utilisateurs</a>
+    <a href="{% url 'admin_orders' %}"><i class="fa fa-box"></i> Commandes</a>
+    <a href="{% url 'admin_books' %}"><i class="fa fa-book"></i> Livres</a>
+    <a href="{% url 'admin_stats' %}"><i class="fa fa-chart-line"></i> Statistiques</a>
+    <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Déconnexion</a>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="admin-content">
+      {# Render Django messages as hidden elements for the admin toast helper #}
+      {% if messages %}
+        {% for message in messages %}
+          <div style="display:none" data-admin-message="{{ message|escape }}" data-admin-message-type="{{ message.tags }}"></div>
+        {% endfor %}
+      {% endif %}
+      <header>
+        <h1>Modifier le livre</h1>
+      </header>
+
+      <section class="edit-book">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit">Modifier</button>
+          <a href="{% url 'admin_books' %}" class="btn-secondary">Annuler</a>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/admin.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}📚 Librairie en Ligne{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
+{% block content %}
+
+  <!-- Barre de recherche -->
+  <section class="search-bar">
+    <form method="get" action="{% url 'index' %}">
+      <input type="text" name="q" placeholder="Rechercher un livre..." value="{{ query }}">
+      <button type="submit">🔍</button>
+    </form>
+  </section>
+
+  <!-- Catégories -->
+  <section class="categories">
+    <button>Romans</button>
+    <button>Sciences</button>
+    <button>Jeunesse</button>
+    <button>BD / Manga</button>
+    <button>Scolaire</button>
+  </section>
+
+
+  <!-- Liste des livres -->
+  <section class="books">
+    {% for book in books %}
+    <div class="book-card" data-book-id="{{ book.id }}" data-title="{{ book.title }}" data-author="{{ book.author }}" data-price="{{ book.price }}" data-description="{{ book.description|default_if_none:'' }}">
+      {% if book.image %}
+        <img src="{{ book.image.url }}" alt="{{ book.title }}">
+      {% else %}
+        <img src="{% static 'candide.jpg' %}" alt="{{ book.title }}">
+      {% endif %}
+      <h3>{{ book.title }}</h3>
+      <p>{{ book.author }}</p>
+      <p class="price">{{ book.price }}</p>
+      <div class="book-actions">
+        <button class="btn-add-cart" data-book-id="{{ book.id }}">Ajouter au panier 🛒</button>
+        <button class="btn-toggle-fav" data-book-id="{{ book.id }}">♡</button>
+      </div>
+    </div>
+    {% empty %}
+      <p>Aucun livre trouvé.</p>
+    {% endfor %}
+  </section>
+
+  <!-- Modal -->
+  <div class="modal" id="bookModal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <img id="modalImg" src="" alt="" style="width:150px;border-radius:10px;">
+      <h2 id="modalTitle"></h2>
+      <p id="modalAuthor"></p>
+      <p id="modalPrice" style="font-weight:bold;color:#6B2F2F;"></p>
+      <p id="modalDesc"></p>
+
+      <!-- Bouton coeur -->
+      <div>
+        <span class="heart" id="heartBtn">❤</span>
+      </div>
+
+      <!-- Noter -->
+      <div class="stars" id="stars">
+        <span data-star="1">★</span>
+        <span data-star="2">★</span>
+        <span data-star="3">★</span>
+        <span data-star="4">★</span>
+        <span data-star="5">★</span>
+      </div>
+
+      <!-- Average rating display -->
+      <div id="avgRating" style="margin-top:8px">Note moyenne: <strong id="avgVal">-</strong></div>
+
+      <!-- Comments list -->
+      <div id="comments" style="margin-top:12px;max-height:180px;overflow:auto">
+        <h4>Commentaires</h4>
+        <div id="commentsList">Aucun commentaire.</div>
+      </div>
+
+      <!-- Commentaire -->
+      <textarea rows="3" placeholder="Laissez un commentaire..."></textarea>
+
+      <!-- Boutons actions -->
+      <div>
+        <button class="btn btn-primary">Ajouter au panier 🛒</button>
+        <button class="btn btn-secondary">Partager 🔗</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // CSRF token helper
+  function getCSRF() {
+    const cookieName = 'csrftoken';
+    const cookies = document.cookie.split(';').map(c=>c.trim());
+    for(const c of cookies){ if(c.startsWith(cookieName+'=')) return decodeURIComponent(c.split('=')[1]); }
+    return '';
+  }
+
+  // Ouvrir le modal
+  const cards = document.querySelectorAll('.book-card');
+  const modal = document.getElementById('bookModal');
+  const closeBtn = document.querySelector('.close');
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      document.getElementById('modalTitle').innerText = card.dataset.title;
+      document.getElementById('modalAuthor').innerText = card.dataset.author;
+      document.getElementById('modalPrice').innerText = card.dataset.price;
+      document.getElementById('modalDesc').innerText = card.dataset.description;
+
+      // 👉 On prend l'image réelle affichée dans la paniere
+      const imgSrc = card.querySelector("img").src;
+      document.getElementById('modalImg').src = imgSrc;
+
+      // Save current book id on modal for actions
+      modal.dataset.bookId = card.dataset.bookId;
+
+      // fetch book metadata (avg rating + latest comments)
+      (async function(){
+        const bookId = card.dataset.bookId;
+        try{
+          const res = await fetch(`/book/${bookId}/meta/`, { headers: {'X-Requested-With': 'XMLHttpRequest'} });
+          if(res.ok){
+            const data = await res.json();
+            document.getElementById('avgVal').innerText = (data.avg_rating || 0).toFixed(1);
+            const cl = document.getElementById('commentsList');
+            if(data.comments && data.comments.length){
+              cl.innerHTML = '';
+              data.comments.forEach(c => {
+                const d = document.createElement('div');
+                d.className = 'comment-item';
+                d.innerHTML = `<strong>${c.user}</strong> <small>${new Date(c.created_at).toLocaleString()}</small><div>${c.text}</div>`;
+                cl.appendChild(d);
+              });
+            } else {
+              cl.innerText = 'Aucun commentaire.';
+            }
+            // reflect avg into stars (round to nearest int)
+            const avg = Math.round(data.avg_rating || 0);
+            const starEls = document.querySelectorAll('#stars span');
+            starEls.forEach(s=>s.classList.remove('active'));
+            for(let i=0;i<avg;i++) if(starEls[i]) starEls[i].classList.add('active');
+          }
+        }catch(err){ /* ignore meta fetch failures */ }
+      })();
+
+      modal.style.display = 'flex';
+    });
+  });
+
+  closeBtn.onclick = () => modal.style.display = 'none';
+  window.onclick = e => { if(e.target == modal) modal.style.display = 'none'; };
+
+  // Bouton coeur toggle
+  const heart = document.getElementById('heartBtn');
+  heart.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const bookId = modal.dataset.bookId;
+    if(!bookId) return;
+    const res = await fetch(`/favorite/toggle/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+    if(res.ok){
+      const data = await res.json();
+      heart.classList.toggle('active', data.status === 'added');
+      // also toggle the corresponding list button if visible
+      const listBtn = document.querySelector(`.btn-toggle-fav[data-book-id="${bookId}"]`);
+      if(listBtn) listBtn.classList.toggle('active', data.status === 'added');
+    }
+  });
+
+  // Notation étoiles
+  const stars = document.querySelectorAll('#stars span');
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      stars.forEach(s => s.classList.remove('active'));
+      for(let i=0; i<star.dataset.star; i++){
+        stars[i].classList.add('active');
+      }
+      // send rating to server
+      (async function(){
+        const bookId = modal.dataset.bookId;
+        if(!bookId) return;
+        try{
+          const res = await fetch(`/book/${bookId}/rate/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF(), 'Content-Type': 'application/x-www-form-urlencoded'}, body: `stars=${encodeURIComponent(star.dataset.star)}` });
+          if(res.ok){ showToast('Merci pour votre notation'); }
+          else { showToast('Erreur lors de l\'envoi de la note', true); }
+        }catch(err){ showToast('Erreur réseau', true); }
+      })();
+    });
+  });
+
+  // Favorite toggle from list
+  document.querySelectorAll('.btn-toggle-fav').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const bookId = btn.dataset.bookId;
+      const res = await fetch(`/favorite/toggle/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+      if(res.ok){
+        const data = await res.json();
+        btn.classList.toggle('active', data.status === 'added');
+      }
+    });
+  });
+
+  // Add to cart buttons
+  document.querySelectorAll('.btn-add-cart').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const bookId = btn.dataset.bookId;
+      const res = await fetch(`/cart/add/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+      if(res.ok){
+        const data = await res.json();
+        updateCartCount(data.total_items || 0);
+        showToast('Livre ajouté au panier');
+      } else {
+        showToast('Erreur lors de l\'ajout au panier', true);
+      }
+    });
+  });
+
+  // Modal add-to-cart button
+  const modalAddBtn = modal.querySelector('.btn-primary');
+  if(modalAddBtn){
+    modalAddBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const bookId = modal.dataset.bookId;
+      if(!bookId) return;
+      const res = await fetch(`/cart/add/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+      if(res.ok){
+        const data = await res.json();
+        updateCartCount(data.total_items || 0);
+        showToast('Livre ajouté au panier');
+      } else {
+        showToast('Erreur lors de l\'ajout au panier', true);
+      }
+    });
+  }
+
+  // Comment submit on blur+enter or explicit send when losing focus (simple UX)
+  const commentArea = modal.querySelector('textarea');
+  if(commentArea){
+    commentArea.addEventListener('keydown', async (e) => {
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        const text = commentArea.value.trim();
+        const bookId = modal.dataset.bookId;
+        if(!bookId || !text) return;
+        try{
+          const res = await fetch(`/book/${bookId}/comment/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF(), 'Content-Type': 'application/x-www-form-urlencoded'}, body: `text=${encodeURIComponent(text)}` });
+          if(res.ok){
+            commentArea.value = '';
+            showToast('Commentaire publié');
+          } else {
+            showToast('Erreur lors de la publication', true);
+          }
+        }catch(err){ showToast('Erreur réseau', true); }
+      }
+    });
+  }
+
+  // Toast helper & cart count
+  function showToast(message, isError=false){
+    const c = document.getElementById('toast-container');
+    if(!c) return alert(message);
+    const t = document.createElement('div');
+    t.className = 'toast';
+    if(isError) t.style.background = 'rgba(176,0,32,0.9)';
+    t.innerText = message;
+    c.appendChild(t);
+    // show
+    setTimeout(()=>t.classList.add('show'), 10);
+    setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 3500);
+  }
+
+  function updateCartCount(count){
+    const el = document.getElementById('cart-count');
+    if(el) el.innerText = count;
+  }
+</script>
+
+
+{% endblock %}

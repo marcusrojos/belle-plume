@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Paiement - Ma Librairie{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+</head>
+<body>
+
+  <!-- Header réutilisable -->
+  <div id="header-placeholder"></div>
+  <script>
+    // charge header si tu as header.html à la racine; sinon supprime ce fetch
+    fetch('header.html')
+      .then(response => response.ok ? response.text() : '')
+      .then(data => { if(data) document.getElementById('header-placeholder').innerHTML = data; })
+      .catch(()=>{/* silent fail si header absent */});
+  </script>
+
+  <div class="container">
+    <h2>Finaliser la commande</h2>
+    <div class="checkout-grid">
+
+      <!-- Récapitulatif du panier -->
+      <div class="cart-summary">
+        <h3>Récapitulatif du panier</h3>
+        {% for item in cart_items %}
+          <div class="cart-item"><span>{{ item.book.title }}</span><span>{{ item.book.price }} FCFA</span></div>
+        {% empty %}
+          <p>Votre panier est vide.</p>
+        {% endfor %}
+        <div class="total">Total : {{ total }} FCFA</div>
+      </div>
+
+      <!-- Formulaire paiement / livraison -->
+      <div class="payment-form">
+        <h3>Informations de livraison</h3>
+
+        <!-- message d'erreur global -->
+        <div id="globalError" class="error"></div>
+
+        <form id="checkoutForm" novalidate>
+          <input type="text" id="fullName" placeholder="Nom complet" value="{{ user.get_full_name|default:user.username }}" required>
+          <input type="email" id="email" placeholder="Email" value="{{ user.email }}" required>
+          <input type="text" id="adresse" placeholder="Adresse" required>
+          <input type="text" id="postal" placeholder="Code postal" required>
+          <input type="text" id="ville" placeholder="Ville" required>
+
+          <h3>Date de livraison souhaitée</h3>
+          <input type="date" id="deliveryDate" required>
+          <small class="text-muted">Choisissez une date à partir de demain</small>
+
+          <h3>Méthode de paiement</h3>
+
+          <!-- Option payer en espèces -->
+          <label class="cash-option" id="cashLabel">
+            <input type="checkbox" id="cashOption" aria-label="Payer en espèces">
+            Payer en espèces
+          </label>
+
+          <!-- Moyens de paiement mobiles -->
+          <div class="payment-methods" role="radiogroup" aria-label="Méthodes de paiement">
+            <div class="payment-method wave" data-method="wave" tabindex="0" role="radio" aria-checked="false">
+              <img src="{% static 'wave.png' %}" alt="Wave">
+              Wave
+            </div>
+            <div class="payment-method orange" data-method="orange" tabindex="0" role="radio" aria-checked="false">
+              <img src="{% static 'orange.png' %}" alt="Orange">
+              Orange
+            </div>
+            <div class="payment-method moov" data-method="moov" tabindex="0" role="radio" aria-checked="false">
+              <img src="{% static 'moov.png' %}" alt="Moov">
+              Moov
+            </div>
+            <div class="payment-method mtn" data-method="mtn" tabindex="0" role="radio" aria-checked="false">
+              <img src="{% static 'mtn.png' %}" alt="MTN">
+              MTN
+            </div>
+          </div>
+
+          <!-- Champ numéro de téléphone (masqué par défaut) -->
+          <div id="phoneContainer">
+            <input type="tel" id="phoneInput" placeholder="Numéro de téléphone (pour le paiement mobile)">
+            <div id="phoneError" class="error">Numéro invalide (minimum 6 chiffres)</div>
+          </div>
+
+          <button type="submit">💳 Payer maintenant</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Elements
+    const methods = document.querySelectorAll('.payment-method');
+    const cash = document.getElementById('cashOption');
+    const cashLabel = document.getElementById('cashLabel');
+    const phoneContainer = document.getElementById('phoneContainer');
+    const phoneInput = document.getElementById('phoneInput');
+    const form = document.getElementById('checkoutForm');
+    const globalError = document.getElementById('globalError');
+    const phoneError = document.getElementById('phoneError');
+    const deliveryDateInput = document.getElementById('deliveryDate');
+
+    // Set minimum date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    deliveryDateInput.min = tomorrowStr;
+
+    // Utility: deselect all methods
+    function deselectAllMethods() {
+      methods.forEach(m => {
+        m.classList.remove('selected');
+        m.setAttribute('aria-checked','false');
+      });
+    }
+
+    // click / keyboard support for methods
+    methods.forEach(method => {
+      method.addEventListener('click', () => selectMethod(method));
+      method.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectMethod(method); }
+      });
+    });
+
+    function selectMethod(method) {
+      deselectAllMethods();
+      method.classList.add('selected');
+      method.setAttribute('aria-checked','true');
+
+      // uncheck cash
+      cash.checked = false;
+      cashLabel.classList.remove('selected');
+
+      // show phone input and set required
+      phoneContainer.style.display = 'block';
+      phoneInput.required = true;
+      phoneInput.focus();
+    }
+
+    // cash checkbox behaviour
+    cash.addEventListener('change', () => {
+      if(cash.checked) {
+        deselectAllMethods();
+        cashLabel.classList.add('selected');
+        phoneContainer.style.display = 'none';
+        phoneInput.required = false;
+        phoneError.style.display = 'none';
+      } else {
+        cashLabel.classList.remove('selected');
+      }
+    });
+
+    // Form submit validation
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      globalError.style.display = 'none';
+      phoneError.style.display = 'none';
+
+      // check delivery date
+      const selectedDate = new Date(deliveryDateInput.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate <= today) {
+        globalError.textContent = 'La date de livraison doit être au moins demain.';
+        globalError.style.display = 'block';
+        return;
+      }
+
+      // check payment selected
+      const anyMethodSelected = document.querySelector('.payment-method.selected') !== null;
+      if(!cash.checked && !anyMethodSelected) {
+        globalError.textContent = 'Veuillez sélectionner un moyen de paiement (espèces ou mobile).';
+        globalError.style.display = 'block';
+        return;
+      }
+
+      // if mobile selected => validate phone
+      if(anyMethodSelected) {
+        const phone = phoneInput.value.trim();
+        // simple validation: at least 6 digits (adjust to your rules)
+        const digits = phone.replace(/\D/g,'');
+        if(digits.length < 6) {
+          phoneError.style.display = 'block';
+          return;
+        }
+      }
+
+      // Tout est OK -> soumettre le formulaire
+      const formData = new FormData(form);
+      formData.append('delivery_date', deliveryDateInput.value);
+      formData.append('payment_method', cash.checked ? 'Espèces' : document.querySelector('.payment-method.selected').getAttribute('data-method'));
+
+      fetch('{% url 'checkout' %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          window.location.href = '{% url 'confirmation' %}';
+        } else {
+          globalError.textContent = 'Erreur lors de la soumission. Veuillez réessayer.';
+          globalError.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        globalError.textContent = 'Erreur réseau. Veuillez réessayer.';
+        globalError.style.display = 'block';
+      });
+    });
+  </script>
+
+{% endblock %}

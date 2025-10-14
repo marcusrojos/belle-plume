@@ -1,0 +1,26 @@
+/* Styles pour la page profil.html */
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fdf8f2; margin: 0; padding: 0; color: #333; }
+header { background: #6B2F2F; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { margin: 0; font-size: 24px; }
+header nav a { color: white; text-decoration: none; margin-left: 20px; transition: 0.3s; }
+header nav a:hover { color: #FFD700; }
+.container { padding: 30px; max-width: 1000px; margin: auto; }
+h2 { text-align: center; margin-bottom: 25px; color: #5A2D0C; }
+.profile { display: flex; align-items: center; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); gap: 20px; }
+.profile img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
+.profile-info { flex: 1; }
+.profile-info h3 { margin: 0; color: #8B4513; }
+.profile-info p { margin: 5px 0; color: #555; }
+.profile-actions button { margin-right: 10px; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 14px; }
+.btn-edit { background: #8B4513; color: white; }
+.btn-edit:hover { background: #5A2D0C; }
+.btn-password { background: #FFD700; color: #333; }
+.btn-password:hover { background: #e6c200; }
+.orders { margin-top: 40px; }
+.order-item { background: white; border-radius: 10px; padding: 15px 20px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+.order-details { flex: 1; }
+.order-details h4 { margin: 0; color: #333; }
+.order-status { font-weight: bold; padding: 6px 12px; border-radius: 6px; font-size: 14px; }
+.en-cours { background: #ffe4b5; color: #8B4513; }
+.expedie { background: #add8e6; color: #004466; }
+.livre { background: #90ee90; color: #004d00; }

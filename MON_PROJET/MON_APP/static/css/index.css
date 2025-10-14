@@ -1,0 +1,114 @@
+/* Styles pour la page d'accueil (index.html) */
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  margin: 0;
+  background: #fdfaf6;
+  color: #333;
+}
+header {
+  background: #6B2F2F;
+  color: white;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header h1 { margin: 0; font-size: 24px; }
+nav a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+nav a:hover { text-decoration: underline; }
+.books { display: flex; flex-wrap: wrap; justify-content: center; margin: 30px; }
+.book-card { background: white; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 15px; margin: 15px; width: 220px; text-align: center; transition: transform 0.3s; cursor: pointer; }
+.book-card:hover { transform: scale(1.05); }
+.book-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; }
+.book-card .price { color: #6B2F2F; font-weight: bold; }
+.book-actions { display: flex; justify-content: space-between; margin-top: 10px; }
+.book-actions button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
+.btn-add-cart { background: #6B2F2F; color: white; }
+.btn-add-cart:hover { background: #8B4513; }
+.btn-toggle-fav { background: #f0f0f0; color: #333; }
+.btn-toggle-fav:hover { background: #ddd; }
+.btn-toggle-fav.active { background: #ff6b6b; color: white; }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; animation: fadeIn 0.4s; }
+.modal-content { background: white; border-radius: 15px; padding: 25px; width: 500px; max-width: 90%; text-align: center; transform: scale(0.7); animation: zoomIn 0.4s forwards; position: relative; }
+.close { position: absolute; top: 10px; right: 15px; font-size: 22px; cursor: pointer; color: #6B2F2F; transition: 0.3s; }
+.close:hover { color: #8B4513; }
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+@keyframes zoomIn { from {transform: scale(0.7);} to {transform: scale(1);} }
+.btn { padding: 10px 20px; margin: 10px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+.btn-primary { background: #6B2F2F; color: white; }
+.btn-primary:hover { background: #8B4513; }
+.btn-secondary { background: #eee; color: #333; }
+.btn-secondary:hover { background: #ddd; }
+.heart { font-size: 24px; cursor: pointer; color: transparent; -webkit-text-stroke: 2px #6B2F2F; transition: 0.3s; }
+.heart.active { color: red; -webkit-text-stroke: 2px red; transform: scale(1.2); }
+.stars { display: flex; justify-content: center; margin: 10px 0; }
+.stars span { font-size: 26px; cursor: pointer; color: #ccc; transition: 0.3s; }
+.stars span.active, .stars span:hover, .stars span:hover ~ span { color: gold; }
+textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 10px; resize: none; }
+.search-bar { margin: 20px auto; display: flex; justify-content: center; }
+.search-bar input { padding: 10px; width: 350px; border: 2px solid #6B2F2F; border-radius: 25px 0 0 25px; outline: none; }
+.search-bar button { padding: 10px 20px; border: none; background: #6B2F2F; color: white; font-weight: bold; border-radius: 0 25px 25px 0; cursor: pointer; transition: 0.3s; }
+.search-bar button:hover { background: #8B4513; }
+.categories { text-align: center; margin: 20px; }
+.categories button { margin: 8px; padding: 10px 25px; background: #eee; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+.categories button:hover { background: #6B2F2F; color: white; }
+
+/* Toast notifications */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(107, 47, 47, 0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  font-weight: bold;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast.error {
+  background: rgba(176, 0, 32, 0.9);
+}
+
+/* Comment styling */
+.comment-item {
+  background: #f9f9f9;
+  padding: 8px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border-left: 3px solid #6B2F2F;
+}
+
+.comment-item strong {
+  color: #6B2F2F;
+}
+
+.comment-item small {
+  color: #666;
+  font-size: 0.8em;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .books {
+    margin: 15px;
+  }
+  .book-card {
+    width: 180px;
+    margin: 10px;
+  }
+  .search-bar input {
+    width: 250px;
+  }
+  .modal-content {
+    width: 90%;
+    padding: 20px;
+  }
+}

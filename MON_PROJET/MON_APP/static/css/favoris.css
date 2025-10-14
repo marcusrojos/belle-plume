@@ -1,0 +1,21 @@
+/* Styles pour la page favoris.html */
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fdf8f2; margin: 0; padding: 0; color: #333; }
+header { background: #6B2F2F; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { margin: 0; font-size: 24px; }
+header nav a { color: white; text-decoration: none; margin-left: 20px; transition: 0.3s; }
+header nav a:hover { color: #FFD700; }
+.container { padding: 30px; max-width: 1000px; margin: auto; }
+h2 { text-align: center; margin-bottom: 20px; color: #5A2D0C; }
+.fav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.fav-item { background: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s; }
+.fav-item:hover { transform: translateY(-5px); }
+.fav-item img { width: 100%; height: 280px; object-fit: cover; }
+.fav-content { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.fav-content h3 { margin: 0; font-size: 18px; }
+.fav-content p { margin: 5px 0; font-size: 14px; color: #666; }
+.fav-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+button { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 14px; }
+.btn-fav { background: none; font-size: 20px; cursor: pointer; color: red; transition: transform 0.2s; }
+.btn-fav:hover { transform: scale(1.2); }
+.btn-panier { background: #8B4513; color: #FFD700; }
+.btn-panier:hover { background: #5A2D0C; }

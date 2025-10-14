@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %}Modifier le livre - Ma Librairie{% endblock %}
 {% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="{% static 'css/admin.css' %}">
 {% endblock %}
 {% block content %}
@@ -26,16 +27,91 @@
           <div style="display:none" data-admin-message="{{ message|escape }}" data-admin-message-type="{{ message.tags }}"></div>
         {% endfor %}
       {% endif %}
+
       <header>
         <h1>Modifier le livre</h1>
+        <a href="{% url 'admin_books' %}" class="btn-back">
+          <i class="fa fa-arrow-left"></i> Retour aux livres
+        </a>
       </header>
 
       <section class="edit-book">
-        <form method="post" enctype="multipart/form-data">
+        <div class="book-info">
+          <h2>{{ book.title }}</h2>
+          <p class="book-meta">par {{ book.author }} - {{ book.price }} FCFA</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="edit-form">
           {% csrf_token %}
-          {{ form.as_p }}
-          <button type="submit">Modifier</button>
-          <a href="{% url 'admin_books' %}" class="btn-secondary">Annuler</a>
+
+          <div class="form-section">
+            <h3>Informations générales</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Titre du livre *</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                  <span class="error">{{ form.title.errors.0 }}</span>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label for="{{ form.author.id_for_label }}">Auteur *</label>
+                {{ form.author }}
+                {% if form.author.errors %}
+                  <span class="error">{{ form.author.errors.0 }}</span>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label for="{{ form.price.id_for_label }}">Prix (FCFA) *</label>
+                {{ form.price }}
+                {% if form.price.errors %}
+                  <span class="error">{{ form.price.errors.0 }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Image du livre</h3>
+            <div class="form-group">
+              <label for="{{ form.image.id_for_label }}">Image actuelle</label>
+              {% if book.image %}
+                <div class="current-image">
+                  <img src="{{ book.image.url }}" alt="{{ book.title }}" style="max-width: 200px; max-height: 200px;">
+                  <p>Image actuelle : {{ book.image.name }}</p>
+                </div>
+              {% else %}
+                <p>Aucune image</p>
+              {% endif %}
+              <label for="{{ form.image.id_for_label }}">Nouvelle image (optionnel)</label>
+              {{ form.image }}
+              {% if form.image.errors %}
+                <span class="error">{{ form.image.errors.0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Description</h3>
+            <div class="form-group">
+              <label for="{{ form.description.id_for_label }}">Description du livre</label>
+              {{ form.description }}
+              {% if form.description.errors %}
+                <span class="error">{{ form.description.errors.0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">
+              <i class="fa fa-save"></i> Enregistrer les modifications
+            </button>
+            <a href="{% url 'admin_books' %}" class="btn-secondary">
+              <i class="fa fa-times"></i> Annuler
+            </a>
+          </div>
         </form>
       </section>
     </div>

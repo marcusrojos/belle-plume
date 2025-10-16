@@ -35,6 +35,34 @@ nav {
 .header-right { display:flex; align-items:center; gap:16px; }
 .cart-badge .cart-link { color: white; text-decoration: none; font-weight: bold; }
 .cart-badge #cart-count { background:#FFD700; color:#333; padding:2px 8px; border-radius:12px; margin-left:6px; }
+/* Conteneur du panier : position relative pour badge */
+.cart-btn {
+  position: relative;
+  display: inline-block;
+}
+
+/* Badge panier */
+#cart-count {
+  position: absolute;
+  top: -6px;     /* ajuste selon la taille de ton icône */
+  right: -6px;   /* ajuste selon la taille de ton icône */
+  background: #FFD700;
+  color: #333;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Supprimer l'ancien margin-left pour éviter le décalage */
+.cart-badge #cart-count {
+  margin-left: 0;
+}
+
 nav a {
   color: white;
   margin-left: 20px;

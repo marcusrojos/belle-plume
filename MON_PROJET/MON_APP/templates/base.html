@@ -19,19 +19,27 @@
                 class="menu-toggle">☰</button>
 
         <div class="header-right">
-            <nav id="main-nav" class="main-nav">
-                <div class="cart-badge">
-                <a href="{% url 'panier' %}" class="cart-link">Panier 🛒 <span id="cart-count">0</span></a>
-            </div>
+        <nav id="main-nav" class="main-nav">
+            <!-- Bouton panier avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'panier' %}{% else %}{% url 'login' %}{% endif %}"
+            class="cart-btn" title="Panier">
+                <img src="{% static 'cadi.png' %}" alt="Panier" style="width:32px; height:32px;">
+                <span id="cart-count">0</span>
+            </a>
             
-                <a href="{% url 'favoris' %}">Favoris ❤️</a>
-                <a href="{% url 'profil' %}">Profil 👤</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}">Déconnexion</a>
-                {% else %}
-                    <a href="{% url 'login' %}">Connexion</a>
-                {% endif %}
-            </nav>
+            <!-- Bouton favoris avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'favoris' %}{% else %}{% url 'login' %}{% endif %}"
+            class="favoris-btn" title="Favoris">
+                <img src="{% static 'coeur.png' %}" alt="Favoris" style="width:32px; height:32px;">
+            </a>
+
+            <!-- Bouton unique compte avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'profil' %}{% else %}{% url 'login' %}{% endif %}"
+            class="account-btn" title="Compte">
+                <img src="{% static 'compte.png' %}" alt="Compte" style="width:32px; height:32px;">
+            </a>
+        </nav>
+
         </div>
     </header>
         <!-- Toast container -->

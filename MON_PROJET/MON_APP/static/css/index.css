@@ -28,12 +28,237 @@ nav a:hover { text-decoration: underline; }
 .btn-toggle-fav { background: #f0f0f0; color: #333; }
 .btn-toggle-fav:hover { background: #ddd; }
 .btn-toggle-fav.active { background: #ff6b6b; color: white; }
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; animation: fadeIn 0.4s; }
-.modal-content { background: white; border-radius: 15px; padding: 25px; width: 500px; max-width: 90%; text-align: center; transform: scale(0.7); animation: zoomIn 0.4s forwards; position: relative; }
-.close { position: absolute; top: 10px; right: 15px; font-size: 22px; cursor: pointer; color: #6B2F2F; transition: 0.3s; }
-.close:hover { color: #8B4513; }
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-@keyframes zoomIn { from {transform: scale(0.7);} to {transform: scale(1);} }
+/* ===== MODAL MODERNE HORIZONTAL ===== */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.modal-box {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  max-width: 850px;
+  width: 90%;
+  max-height: 90vh; /* 🔹 un peu plus grand qu'avant */
+  animation: slideUp 0.4s ease forwards;
+}
+.modal-left {
+  flex: 1;
+  background: linear-gradient(120deg, #f6e9d7, #fff9f2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.modal-left img {
+  width: 100%;
+  max-width: 280px;
+  border-radius: 15px;
+  object-fit: cover;
+}
+
+.modal-right {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  color: #333;
+  padding: 25px;
+  overflow-y: auto; /* ✅ permet de scroller verticalement si ça déborde */
+}
+
+.modal-right .scrollable {
+  flex: 1;
+  overflow-y: auto;
+}
+
+
+.modal-right h2 {
+  font-size: 1.6em;
+  color: #5b2b2b;
+  margin-bottom: 5px;
+}
+
+.modal-right p {
+  line-height: 1.5;
+}
+
+.modal-right #modalPrice {
+  font-weight: bold;
+  color: #6B2F2F;
+  font-size: 1.2em;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  color: #333;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.modal-close:hover {
+  color: #6B2F2F;
+  transform: scale(1.1);
+}
+
+.modal-actions, .btn-group {
+  margin-top: auto; /* pousse les boutons en bas */
+  display: flex;
+  gap: 10px;
+}
+
+.heart {
+  font-size: 1.5em;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.heart.active {
+  color: #e63946;
+  transform: scale(1.2);
+}
+
+.stars span {
+  cursor: pointer;
+  font-size: 1.3em;
+  color: #ccc;
+  transition: 0.3s;
+}
+
+.stars span.active,
+.stars span:hover {
+  color: gold;
+  transform: scale(1.1);
+}
+
+.avg-rating {
+  font-size: 0.95em;
+  color: #444;
+  margin-top: 5px;
+}
+
+.comments {
+  margin-top: 12px;
+  height: 400px;          /* plus grand pour voir plus de commentaires */
+  overflow: hidden;       /* le scroll reste dans #commentsList */
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.comment-input textarea {
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  resize: none;
+}
+
+.comment-input button {
+  height: 80px; /* même hauteur que textarea */
+  align-self: flex-end;
+}
+
+
+textarea {
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  resize: none;
+  width: 100%;
+}
+
+.btn-group {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary {
+  background-color: #6B2F2F;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #e8d3b9;
+  color: #333;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: scale(1.03);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .modal-box {
+    flex-direction: column;
+    width: 95%;
+    max-width: 500px;
+  }
+
+  .modal-left {
+    background: none;
+  }
+
+  .modal-left img {
+    max-width: 90%;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 .btn { padding: 10px 20px; margin: 10px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
 .btn-primary { background: #6B2F2F; color: white; }
 .btn-primary:hover { background: #8B4513; }
@@ -95,6 +320,16 @@ textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8p
   font-size: 0.8em;
 }
 
+#commentsList {
+  height: 100%;             /* prend toute la hauteur de .comments */
+  overflow-y: auto;         /* scroll uniquement ici si nécessaire */
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  margin-top: 8px;
+}
+
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .books {
@@ -111,4 +346,8 @@ textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8p
     width: 90%;
     padding: 20px;
   }
+    .comments {
+    height: 300px; /* un peu plus petit pour mobiles */
+  }
 }
+

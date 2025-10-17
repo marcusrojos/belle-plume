@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Connexion - Ma Librairie{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+{% block content %}
+  <div class="login-container">
+    <h2>Connexion</h2>
+    {% if messages %}
+      {% for message in messages %}
+        <div style="color:#b00020; margin-bottom:10px;">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="text" name="identifier" placeholder="Email ou nom d'utilisateur" required>
+      <input type="password" name="password" placeholder="Mot de passe" required>
+      <button type="submit">Se connecter</button>
+    </form>
+    <div class="login-footer">
+      Pas encore inscrit ? <a href="{% url 'register' %}">Créer un compte</a>
+    </div>
+  </div>
+{% endblock %}

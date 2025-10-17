@@ -1,0 +1,433 @@
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ma Librairie{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+    /* Inline footer styles to ensure they load */
+    .main-footer {
+        background: #6B2F2F !important;
+        color: white !important;
+        margin-top: auto !important;
+        padding: 40px 0 20px !important;
+        width: 100% !important;
+        position: relative !important;
+        clear: both !important;
+    }
+
+    .footer-content {
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+        padding: 0 40px !important;
+        display: grid !important;
+        grid-template-columns: 2fr 1fr 1fr 1fr !important;
+        gap: 40px !important;
+    }
+
+    .footer-section h3 {
+        color: #FFD700 !important;
+        margin-bottom: 20px !important;
+        font-size: 1.5rem !important;
+    }
+
+    .footer-section h4 {
+        color: #FFD700 !important;
+        margin-bottom: 15px !important;
+        font-size: 1.1rem !important;
+    }
+
+    .footer-section p {
+        line-height: 1.6 !important;
+        margin-bottom: 15px !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .footer-section ul {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .footer-section ul li {
+        margin-bottom: 8px !important;
+    }
+
+    .footer-section ul li a {
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-decoration: none !important;
+        transition: color 0.3s !important;
+    }
+
+    .footer-section ul li a:hover {
+        color: #FFD700 !important;
+    }
+
+    .social-links {
+        display: flex !important;
+        gap: 20px !important;
+        margin-top: 20px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .social-links a {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        text-decoration: none !important;
+        font-size: 0.9rem !important;
+        transition: background-color 0.3s, transform 0.3s !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .social-links a:hover {
+        background: #FFD700 !important;
+        color: #333 !important;
+        transform: translateY(-2px) !important;
+    }
+
+    .social-icon {
+        font-size: 1.2rem !important;
+    }
+
+    .social-text {
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+    }
+
+    .footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+        margin-top: 30px !important;
+        padding: 20px 40px 0 !important;
+        text-align: center !important;
+    }
+
+    .footer-bottom p {
+        color: rgba(255, 255, 255, 0.6) !important;
+        margin: 0 !important;
+    }
+
+    /* Header Navigation Styles */
+    .nav-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+        color: white !important;
+        text-decoration: none !important;
+        font-weight: bold !important;
+        transition: color 0.2s !important;
+        border-radius: 8px !important;
+    }
+
+    .nav-item:hover {
+        color: #FFD700 !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .nav-icon {
+        font-size: 1.2rem !important;
+        color: #FFD700 !important;
+    }
+
+    .nav-text {
+        font-size: 0.9rem !important;
+        white-space: nowrap !important;
+        /* Inherits white color from parent nav elements */
+    }
+
+    .cart-btn, .favoris-btn, .account-btn {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+        color: white !important;
+        text-decoration: none !important;
+        font-weight: bold !important;
+        transition: color 0.2s !important;
+        border-radius: 8px !important;
+        position: relative !important;
+    }
+
+    .cart-btn:hover, .favoris-btn:hover, .account-btn:hover {
+        color: #FFD700 !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .admin-item {
+        background: rgba(255, 215, 0, 0.1) !important;
+        border: 1px solid #FFD700 !important;
+    }
+
+    .admin-item:hover {
+        background: #FFD700 !important;
+        color: #333 !important;
+    }
+
+    /* Mobile Menu Button Fix */
+    @media (max-width: 768px) {
+        header {
+            position: relative !important;
+        }
+
+        .menu-toggle {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: absolute !important;
+            right: 16px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 100 !important;
+            background: transparent !important;
+            border: 2px solid rgba(255,255,255,0.08) !important;
+            color: white !important;
+            padding: 6px 10px !important;
+            border-radius: 8px !important;
+            font-size: 20px !important;
+            cursor: pointer !important;
+        }
+
+        /* Hide nav by default on mobile */
+        .main-nav {
+            display: none !important;
+            position: absolute !important;
+            top: 64px !important;
+            right: 16px !important;
+            background: #6B2F2F !important;
+            padding: 12px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+            z-index: 50 !important;
+        }
+
+        .main-nav.open {
+            display: block !important;
+        }
+
+        .main-nav a {
+            display: block !important;
+            margin: 8px 0 !important;
+        }
+
+        .nav-text {
+            display: none !important;
+        }
+
+        .nav-item, .cart-btn, .favoris-btn, .account-btn {
+            padding: 8px !important;
+            justify-content: center !important;
+        }
+    }
+
+    /* Responsive footer */
+    @media (max-width: 768px) {
+        .footer-content {
+            grid-template-columns: 1fr !important;
+            gap: 30px !important;
+            padding: 0 20px !important;
+        }
+
+        .social-links {
+            justify-content: center !important;
+            gap: 15px !important;
+        }
+
+        .social-links a {
+            padding: 6px 10px !important;
+            font-size: 0.8rem !important;
+        }
+    }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Render CSRF token once to ensure CSRF cookie is set for AJAX requests -->
+    <div style="display:none">{% csrf_token %}</div>
+    {% if not hide_base_nav %}
+    <header>
+        <div class="header-left">
+            <h1><a class="brand" href="{% url 'index' %}">📚 Ma Librairie</a></h1>
+        </div>
+        <!-- Mobile menu toggle button -->
+        <button id="menu-toggle" aria-controls="main-nav" aria-expanded="false" aria-label="Ouvrir le menu"
+                class="menu-toggle">☰</button>
+
+        <div class="header-right">
+        <nav id="main-nav" class="main-nav">
+            <!-- Accueil -->
+            <a href="{% url 'index' %}" class="nav-item" title="Accueil">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">Accueil</span>
+            </a>
+
+            <!-- Contact -->
+            <a href="{% url 'contact' %}" class="nav-item" title="Contact">
+                <span class="nav-icon">📞</span>
+                <span class="nav-text">Contact</span>
+            </a>
+
+            <!-- À propos -->
+            <a href="{% url 'about' %}" class="nav-item" title="À propos">
+                <span class="nav-icon">ℹ️</span>
+                <span class="nav-text">À propos</span>
+            </a>
+
+            <!-- Bouton panier avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'panier' %}{% else %}{% url 'login' %}{% endif %}"
+            class="cart-btn" title="Panier">
+                <img src="{% static 'cadi.png' %}" alt="Panier" style="width:24px; height:24px;">
+                <span class="nav-text">Panier</span>
+                <span id="cart-count">0</span>
+            </a>
+
+            <!-- Bouton favoris avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'favoris' %}{% else %}{% url 'login' %}{% endif %}"
+            class="favoris-btn" title="Favoris">
+                <img src="{% static 'coeur.png' %}" alt="Favoris" style="width:24px; height:24px;">
+                <span class="nav-text">Favoris</span>
+            </a>
+
+            <!-- Bouton compte avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'profil' %}{% else %}{% url 'login' %}{% endif %}"
+            class="account-btn" title="Compte">
+                <img src="{% static 'compte.png' %}" alt="Compte" style="width:24px; height:24px;">
+                <span class="nav-text">Compte</span>
+            </a>
+
+            <!-- Onglet Admin pour superutilisateurs -->
+            {% if user.is_superuser %}
+            <a href="{% url 'admin_dashboard' %}" class="nav-item admin-item" title="Administration">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Admin</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        </div>
+    </header>
+        <!-- Toast container -->
+        <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+    {% endif %}
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if not hide_base_nav %}
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>📚 Ma Librairie</h3>
+                <p>Votre librairie en ligne de confiance pour découvrir de nouveaux livres et auteurs.</p>
+                <div class="social-links">
+                    <a href="https://facebook.com" aria-label="Suivez-nous sur Facebook" title="Facebook">
+                        <span class="social-icon">📘</span>
+                        <span class="social-text">Facebook</span>
+                    </a>
+                    <a href="https://twitter.com" aria-label="Suivez-nous sur Twitter" title="Twitter">
+                        <span class="social-icon">🐦</span>
+                        <span class="social-text">Twitter</span>
+                    </a>
+                    <a href="https://instagram.com" aria-label="Suivez-nous sur Instagram" title="Instagram">
+                        <span class="social-icon">📷</span>
+                        <span class="social-text">Instagram</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>🔗 Navigation</h4>
+                <ul>
+                    <li><a href="{% url 'index' %}">🏠 Accueil</a></li>
+                    <li><a href="{% url 'contact' %}">📞 Contact</a></li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'panier' %}">🛒 Panier</a></li>
+                    <li><a href="{% url 'favoris' %}">❤️ Favoris</a></li>
+                    <li><a href="{% url 'profil' %}">👤 Profil</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>👨‍💼 Service client</h4>
+                <ul>
+                    <li><a href="{% url 'contact' %}">📞 Nous contacter</a></li>
+                    <li><a href="#">❓ FAQ</a></li>
+                    <li><a href="#">📦 Livraison</a></li>
+                    <li><a href="#">↩️ Retours</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>📋 Informations</h4>
+                <ul>
+                    <li><a href="#">ℹ️ À propos</a></li>
+                    <li><a href="#">📄 Conditions d'utilisation</a></li>
+                    <li><a href="#">🔒 Politique de confidentialité</a></li>
+                    <li><a href="#">⚖️ Mentions légales</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ma Librairie. Tous droits réservés.</p>
+        </div>
+    </footer>
+    {% endif %}
+        {% block extra_js %}
+        <script>
+        // Device detection and responsive utilities
+        (function(){
+            // Detect device type
+            const isMobile = window.innerWidth <= 768;
+            const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+            const isDesktop = window.innerWidth > 1024;
+
+            // Add device classes to body for CSS targeting
+            document.body.classList.add(isMobile ? 'device-mobile' : isTablet ? 'device-tablet' : 'device-desktop');
+
+            // Update on resize
+            window.addEventListener('resize', function(){
+                document.body.classList.remove('device-mobile', 'device-tablet', 'device-desktop');
+                const newIsMobile = window.innerWidth <= 768;
+                const newIsTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+                const newIsDesktop = window.innerWidth > 1024;
+                document.body.classList.add(newIsMobile ? 'device-mobile' : newIsTablet ? 'device-tablet' : 'device-desktop');
+            });
+
+            // Simple accessible toggle for mobile nav
+            const btn = document.getElementById('menu-toggle');
+            const nav = document.getElementById('main-nav');
+            if(!btn || !nav) return;
+            btn.addEventListener('click', function(){
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', String(!expanded));
+                btn.setAttribute('aria-label', expanded ? 'Ouvrir le menu' : 'Fermer le menu');
+                nav.classList.toggle('open');
+            });
+        })();
+        </script>
+            <script>
+            // Close mobile nav on outside click or when clicking a link
+            (function(){
+                const btn = document.getElementById('menu-toggle');
+                const nav = document.getElementById('main-nav');
+                if(!nav) return;
+                document.addEventListener('click', (e)=>{
+                    if(!nav.classList.contains('open')) return;
+                    const isClickInside = nav.contains(e.target) || (btn && btn.contains(e.target));
+                    if(!isClickInside){
+                        nav.classList.remove('open');
+                        if(btn) btn.setAttribute('aria-expanded','false');
+                    }
+                });
+                // close when clicking a nav link
+                nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=>{ nav.classList.remove('open'); if(btn) btn.setAttribute('aria-expanded','false'); }));
+            })();
+            </script>
+        {% endblock %}
+</body>
+</html>

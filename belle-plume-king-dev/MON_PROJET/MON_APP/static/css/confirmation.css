@@ -1,0 +1,14 @@
+/* Styles pour la page confirmation.html */
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #fdf8f2; margin: 0; padding: 0; color: #333; display: flex; flex-direction: column; align-items: center; }
+.container { text-align: center; margin: 100px auto; padding: 20px; max-width: 600px; background: white; border-radius: 15px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); animation: fadeIn 0.6s ease; }
+h1 { color: #6B2F2F; font-size: 36px; margin-bottom: 20px; animation: slideDown 0.6s ease; }
+p { font-size: 18px; margin-bottom: 20px; }
+.summary { text-align: left; margin: 20px 0; border-top: 1px solid #ccc; padding-top: 15px; }
+.summary div { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.total { font-weight: bold; color: #6B2F2F; margin-top: 10px; }
+button { padding: 12px 25px; margin: 15px 10px 0 10px; border: none; border-radius: 25px; background: #6B2F2F; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+button:hover { background: #8B4513; }
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+@keyframes slideDown { from {transform: translateY(-30px); opacity:0;} to {transform: translateY(0); opacity:1;} }
+.checkmark { font-size: 60px; color: #6B2F2F; margin-bottom: 15px; animation: pop 0.6s ease; }
+@keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.2);} 100% { transform: scale(1);} }

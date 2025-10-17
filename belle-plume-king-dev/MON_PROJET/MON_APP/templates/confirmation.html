@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Commande Confirmée - Ma Librairie{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/confirmation.css' %}">
+</head>
+<body>
+
+  <div class="container">
+    <div class="checkmark">✔</div>
+    <h1>Commande Confirmée !</h1>
+    <p>Merci pour votre achat. Votre commande a été enregistrée avec succès.</p>
+
+    <div class="order-details">
+      <h3>Détails de la commande :</h3>
+      <div class="order-info">
+        <div><strong>Numéro de commande :</strong> <span class="order-number">{{ order.order_number }}</span></div>
+        <div><strong>Statut :</strong> <span class="status {{ order.status }}">{{ order.get_status_display }}</span></div>
+        <div><strong>Date de commande :</strong> {{ order.created_at|date:"d/m/Y H:i" }}</div>
+        <div><strong>Date de livraison souhaitée :</strong> {{ order.delivery_date|date:"d/m/Y" }}</div>
+        <div><strong>Méthode de paiement :</strong> {{ order.payment_method }}</div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <h3>Articles commandés :</h3>
+      {% for item in order.items.all %}
+        <div class="order-item">
+          <span>{{ item.book.title }} (x{{ item.quantity }})</span>
+          <span>{{ item.price }} FCFA</span>
+        </div>
+      {% empty %}
+        <div><span>Aucun article</span></div>
+      {% endfor %}
+      <div class="total"><span>Total</span><span>{{ order.total }} FCFA</span></div>
+    </div>
+
+    <div class="actions">
+      <button onclick="location.href='{% url 'index' %}'">🏠 Retour à l'accueil</button>
+      <button onclick="location.href='{% url 'profil' %}'">📋 Voir mes commandes</button>
+      <button onclick="window.print()">🖨️ Imprimer</button>
+    </div>
+  </div>
+
+  <style>
+    .order-details {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .order-info div {
+      margin: 8px 0;
+    }
+    .order-number {
+      font-weight: bold;
+      color: #007bff;
+    }
+    .status {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .status.en-attente { background: #fff3cd; color: #856404; }
+    .status.confirmée { background: #d1ecf1; color: #0c5460; }
+    .status.en-préparation { background: #d4edda; color: #155724; }
+    .status.en-livraison { background: #cce5ff; color: #004085; }
+    .status.livrée { background: #d4edda; color: #155724; }
+    .status.annulée { background: #f8d7da; color: #721c24; }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .actions button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      transition: background 0.3s;
+    }
+    .actions button:hover {
+      background: #0056b3;
+    }
+    @media print {
+      .actions { display: none; }
+    }
+  </style>
+{% endblock %}

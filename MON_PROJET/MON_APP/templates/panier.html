@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Mon Panier{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/panier.css' %}">
+</head>
+<body>
+  <div class="container">
+    <h2>Votre Panier</h2>
+
+    {% for item in cart_items %}
+    <div class="panier-item">
+      <img src="{% if item.book.image %}{{ item.book.image.url }}{% else %}{% static 'default.jpg' %}{% endif %}" alt="Livre">
+      <div class="item-info">
+        <h3>{{ item.book.title }}</h3>
+        <p>Auteur: {{ item.book.author }}</p>
+        <p>Prix: {{ item.book.price }} FCFA</p>
+      </div>
+      <div class="item-actions">
+        <input type="number" class="qty" value="{{ item.quantity }}" min="1">
+        <button>🗑 Supprimer</button>
+      </div>
+    </div>
+    {% empty %}
+      <p>Votre panier est vide.</p>
+    {% endfor %}
+
+    <div class="total">Total: {{ total }} FCFA</div>
+    <button class="checkout" onclick="window.location.href='{% url 'checkout' %}'">Procéder au paiement 💳</button>
+  </div>
+{% endblock %}

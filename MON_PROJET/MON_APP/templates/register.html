@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Inscription - Ma Librairie{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+  <div class="register-container">
+    <h2>Créer un compte</h2>
+    {% if messages %}
+      {% for message in messages %}
+        <div style="color:#b00020; margin-bottom:10px;">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="text" name="full_name" placeholder="Nom complet" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Mot de passe" required>
+      <input type="password" name="password2" placeholder="Confirmer le mot de passe" required>
+      <button type="submit">S'inscrire</button>
+    </form>
+    <div class="register-footer">
+      Déjà inscrit ? <a href="{% url 'login' %}">Se connecter</a>
+    </div>
+  </div>
+{% endblock %}

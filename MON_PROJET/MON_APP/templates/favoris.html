@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Mes Favoris{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/favoris.css' %}">
+  <div class="container">
+    <h2>Mes Livres Favoris ❤️</h2>
+    <div class="fav-grid">
+      {% for fav in favoris %}
+  <div class="fav-item" data-book-id="{{ fav.book.id }}">
+        <img src="{% if fav.book.image %}{{ fav.book.image.url }}{% else %}{% static 'default.jpg' %}{% endif %}" alt="Livre">
+        <div class="fav-content">
+          <h3>{{ fav.book.title }}</h3>
+          <p>Auteur : {{ fav.book.author }}</p>
+          <div class="fav-actions">
+            <button class="btn-panier">🛒 Ajouter au panier</button>
+            <button class="btn-fav">❤️</button>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+        <p>Vous n'avez pas encore de favoris.</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+<script>
+  function getCSRF() {
+    const cookieName = 'csrftoken';
+    const cookies = document.cookie.split(';').map(c=>c.trim());
+    for(const c of cookies){ if(c.startsWith(cookieName+'=')) return decodeURIComponent(c.split('=')[1]); }
+    return '';
+  }
+
+  document.querySelectorAll('.btn-panier').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const bookId = btn.closest('.fav-item').dataset.bookId;
+      const res = await fetch(`/cart/add/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+      if(res.ok){
+        const data = await res.json();
+        const c = document.getElementById('cart-count'); if(c) c.innerText = data.total_items || 0;
+        showToast('Ajouté au panier');
+      } else showToast('Erreur', true);
+    });
+  });
+
+  document.querySelectorAll('.btn-fav').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const bookId = btn.closest('.fav-item').dataset.bookId;
+      const res = await fetch(`/favorite/toggle/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+      if(res.ok){
+        // remove the item from the DOM on unfavorite
+        const data = await res.json();
+        if(data.status === 'removed') btn.closest('.fav-item').remove();
+      }
+    });
+  });
+
+  // Toast helper
+  function showToast(message, isError=false){
+    const c = document.getElementById('toast-container');
+    if(!c) return alert(message);
+    const t = document.createElement('div');
+    t.className = 'toast';
+    if(isError) t.style.background = 'rgba(176,0,32,0.9)';
+    t.innerText = message;
+    c.appendChild(t);
+    setTimeout(()=>t.classList.add('show'), 10);
+    setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 3500);
+  }
+</script>

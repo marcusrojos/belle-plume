@@ -1,0 +1,104 @@
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ma Librairie{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Render CSRF token once to ensure CSRF cookie is set for AJAX requests -->
+    <div style="display:none">{% csrf_token %}</div>
+    {% if not hide_base_nav %}
+    <header>
+        <div class="header-left">
+            <h1><a class="brand" href="{% url 'index' %}">📚 Ma Librairie</a></h1>
+        </div>
+        <!-- Mobile menu toggle button -->
+        <button id="menu-toggle" aria-controls="main-nav" aria-expanded="false" aria-label="Ouvrir le menu"
+                class="menu-toggle">☰</button>
+
+        <div class="header-right">
+        <nav id="main-nav" class="main-nav">
+            <!-- Bouton panier avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'panier' %}{% else %}{% url 'login' %}{% endif %}"
+            class="cart-btn" title="Panier">
+                <img src="{% static 'cadi.png' %}" alt="Panier" style="width:32px; height:32px;">
+                <span id="cart-count">0</span>
+            </a>
+            
+            <!-- Bouton favoris avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'favoris' %}{% else %}{% url 'login' %}{% endif %}"
+            class="favoris-btn" title="Favoris">
+                <img src="{% static 'coeur.png' %}" alt="Favoris" style="width:32px; height:32px;">
+            </a>
+
+            <!-- Bouton unique compte avec image -->
+            <a href="{% if user.is_authenticated %}{% url 'profil' %}{% else %}{% url 'login' %}{% endif %}"
+            class="account-btn" title="Compte">
+                <img src="{% static 'compte.png' %}" alt="Compte" style="width:32px; height:32px;">
+            </a>
+        </nav>
+
+        </div>
+    </header>
+        <!-- Toast container -->
+        <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+    {% endif %}
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+        {% block extra_js %}
+        <script>
+        // Device detection and responsive utilities
+        (function(){
+            // Detect device type
+            const isMobile = window.innerWidth <= 768;
+            const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+            const isDesktop = window.innerWidth > 1024;
+
+            // Add device classes to body for CSS targeting
+            document.body.classList.add(isMobile ? 'device-mobile' : isTablet ? 'device-tablet' : 'device-desktop');
+
+            // Update on resize
+            window.addEventListener('resize', function(){
+                document.body.classList.remove('device-mobile', 'device-tablet', 'device-desktop');
+                const newIsMobile = window.innerWidth <= 768;
+                const newIsTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+                const newIsDesktop = window.innerWidth > 1024;
+                document.body.classList.add(newIsMobile ? 'device-mobile' : newIsTablet ? 'device-tablet' : 'device-desktop');
+            });
+
+            // Simple accessible toggle for mobile nav
+            const btn = document.getElementById('menu-toggle');
+            const nav = document.getElementById('main-nav');
+            if(!btn || !nav) return;
+            btn.addEventListener('click', function(){
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', String(!expanded));
+                btn.setAttribute('aria-label', expanded ? 'Ouvrir le menu' : 'Fermer le menu');
+                nav.classList.toggle('open');
+            });
+        })();
+        </script>
+            <script>
+            // Close mobile nav on outside click or when clicking a link
+            (function(){
+                const btn = document.getElementById('menu-toggle');
+                const nav = document.getElementById('main-nav');
+                if(!nav) return;
+                document.addEventListener('click', (e)=>{
+                    if(!nav.classList.contains('open')) return;
+                    const isClickInside = nav.contains(e.target) || (btn && btn.contains(e.target));
+                    if(!isClickInside){
+                        nav.classList.remove('open');
+                        if(btn) btn.setAttribute('aria-expanded','false');
+                    }
+                });
+                // close when clicking a nav link
+                nav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=>{ nav.classList.remove('open'); if(btn) btn.setAttribute('aria-expanded','false'); }));
+            })();
+            </script>
+        {% endblock %}
+</body>
+</html>

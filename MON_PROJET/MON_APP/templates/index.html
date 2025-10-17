@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}📚 Librairie en Ligne{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Barre de recherche -->
+<section class="search-bar">
+  <form method="get" action="{% url 'index' %}">
+    <input type="text" name="q" placeholder="Rechercher un livre..." value="{{ query }}">
+    <button type="submit">🔍</button>
+  </form>
+</section>
+
+<!-- Catégories -->
+<section class="categories">
+  <button>Romans</button>
+  <button>Sciences</button>
+  <button>Jeunesse</button>
+  <button>BD / Manga</button>
+  <button>Scolaire</button>
+</section>
+
+<!-- Liste des livres -->
+<section class="books">
+  {% for book in books %}
+  <div class="book-card" data-book-id="{{ book.id }}" data-title="{{ book.title }}" data-author="{{ book.author }}" data-price="{{ book.price }}" data-description="{{ book.description|default_if_none:'' }}">
+    {% if book.image %}
+      <img src="{{ book.image.url }}" alt="{{ book.title }}">
+    {% else %}
+      <img src="{% static 'candide.jpg' %}" alt="{{ book.title }}">
+    {% endif %}
+    <h3>{{ book.title }}</h3>
+    <p>{{ book.author }}</p>
+    <p class="price">{{ book.price }}</p>
+    <div class="book-actions">
+      <button class="btn-add-cart" data-book-id="{{ book.id }}">Ajouter au panier 🛒</button>
+      <button class="btn-toggle-fav" data-book-id="{{ book.id }}">♡</button>
+    </div>
+  </div>
+  {% empty %}
+    <p>Aucun livre trouvé.</p>
+  {% endfor %}
+</section>
+
+<!-- Modal horizontal moderne -->
+<div class="modal" id="bookModal">
+  <div class="modal-overlay"></div>
+  <div class="modal-box">
+    <button class="modal-close">&times;</button>
+
+    <div class="modal-left">
+      <img id="modalImg" src="" alt="">
+    </div>
+
+    <div class="modal-right">
+      <h2 id="modalTitle"></h2>
+      <p id="modalAuthor"></p>
+      <p id="modalPrice"></p>
+      <p id="modalDesc"></p>
+
+      <div class="modal-actions">
+        <span class="heart" id="heartBtn">❤</span>
+        <div class="stars" id="stars">
+          <span data-star="1">★</span>
+          <span data-star="2">★</span>
+          <span data-star="3">★</span>
+          <span data-star="4">★</span>
+          <span data-star="5">★</span>
+        </div>
+      </div>
+
+      <div id="avgRating" class="avg-rating">
+        Note moyenne: <strong id="avgVal">-</strong>
+      </div>
+
+      <div id="comments" class="comments">
+        <h4>Commentaires</h4>
+        <div id="commentsList" >Aucun commentaire.</div>
+      </div>
+
+      <div class="comment-input">
+        <textarea id="newComment" placeholder="Laissez un commentaire..."></textarea>
+        <button class="btn btn-primary" id="postCommentBtn">Publier</button>
+      </div>
+
+      <!-- ✅ Boutons Ajouter au panier et Partager -->
+      <div class="btn-group">
+        <button class="btn btn-primary" id="modalAddToCart">Ajouter au panier 🛒</button>
+        <button class="btn btn-secondary" id="modalShare">Partager 🔗</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script>
+/* --- JS complet pour modal, favoris, panier, commentaires et notation --- */
+
+function getCSRF() {
+  const cookieName = 'csrftoken';
+  const cookies = document.cookie.split(';').map(c=>c.trim());
+  for(const c of cookies){ if(c.startsWith(cookieName+'=')) return decodeURIComponent(c.split('=')[1]); }
+  return '';
+}
+
+const cards = document.querySelectorAll('.book-card');
+const modal = document.getElementById('bookModal');
+const closeBtn = document.querySelector('.modal-close');
+
+cards.forEach(card => {
+  card.addEventListener('click', () => {
+    document.getElementById('modalTitle').innerText = card.dataset.title;
+    document.getElementById('modalAuthor').innerText = card.dataset.author;
+    document.getElementById('modalPrice').innerText = card.dataset.price;
+    document.getElementById('modalDesc').innerText = card.dataset.description;
+    document.getElementById('modalImg').src = card.querySelector("img").src;
+    modal.dataset.bookId = card.dataset.bookId;
+
+    (async function(){
+      const bookId = card.dataset.bookId;
+      try{
+        const res = await fetch(`/book/${bookId}/meta/`, { headers: {'X-Requested-With': 'XMLHttpRequest'} });
+        if(res.ok){
+          const data = await res.json();
+          document.getElementById('avgVal').innerText = (data.avg_rating || 0).toFixed(1);
+          const cl = document.getElementById('commentsList');
+          if(data.comments && data.comments.length){
+            cl.innerHTML = '';
+            data.comments.forEach(c => {
+              const d = document.createElement('div');
+              d.className = 'comment-item';
+              d.innerHTML = `<strong>${c.user}</strong> <small>${new Date(c.created_at).toLocaleString()}</small><div>${c.text}</div>`;
+              cl.appendChild(d);
+            });
+          } else {
+            cl.innerText = 'Aucun commentaire.';
+          }
+          const avg = Math.round(data.avg_rating || 0);
+          const starEls = document.querySelectorAll('#stars span');
+          starEls.forEach(s=>s.classList.remove('active'));
+          for(let i=0;i<avg;i++) if(starEls[i]) starEls[i].classList.add('active');
+        }
+      }catch(err){}
+    })();
+
+    modal.style.display = 'flex';
+  });
+});
+
+closeBtn.onclick = () => modal.style.display = 'none';
+window.onclick = e => { if(e.target == modal) modal.style.display = 'none'; };
+
+// Favorite toggle
+const heart = document.getElementById('heartBtn');
+heart.addEventListener('click', async (e) => {
+  e.stopPropagation();
+  const bookId = modal.dataset.bookId;
+  if(!bookId) return;
+  const res = await fetch(`/favorite/toggle/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+  if(res.ok){
+    const data = await res.json();
+    heart.classList.toggle('active', data.status === 'added');
+    const listBtn = document.querySelector(`.btn-toggle-fav[data-book-id="${bookId}"]`);
+    if(listBtn) listBtn.classList.toggle('active', data.status === 'added');
+  }
+});
+
+// Notation étoiles
+const stars = document.querySelectorAll('#stars span');
+stars.forEach(star => {
+  star.addEventListener('click', () => {
+    stars.forEach(s => s.classList.remove('active'));
+    for(let i=0; i<star.dataset.star; i++) stars[i].classList.add('active');
+    (async function(){
+      const bookId = modal.dataset.bookId;
+      if(!bookId) return;
+      try{
+        const res = await fetch(`/book/${bookId}/rate/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF(), 'Content-Type': 'application/x-www-form-urlencoded'}, body: `stars=${encodeURIComponent(star.dataset.star)}` });
+        if(res.ok) showToast('Merci pour votre notation');
+        else showToast('Erreur lors de l\'envoi de la note', true);
+      }catch(err){ showToast('Erreur réseau', true); }
+    })();
+  });
+});
+
+// Favorite from list
+document.querySelectorAll('.btn-toggle-fav').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const bookId = btn.dataset.bookId;
+    const res = await fetch(`/favorite/toggle/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+    if(res.ok){
+      const data = await res.json();
+      btn.classList.toggle('active', data.status === 'added');
+    }
+  });
+});
+
+// Add to cart
+document.querySelectorAll('.btn-add-cart').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const bookId = btn.dataset.bookId;
+    const res = await fetch(`/cart/add/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+    if(res.ok){
+      const data = await res.json();
+      updateCartCount(data.total_items || 0);
+      showToast('Livre ajouté au panier');
+    } else showToast('Erreur lors de l\'ajout au panier', true);
+  });
+});
+
+// Modal add-to-cart
+// Remplacer l'ancien par ça
+const modalAddBtn = document.getElementById('modalAddToCart');
+if(modalAddBtn){
+  modalAddBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const bookId = modal.dataset.bookId;
+    if(!bookId) return;
+    const res = await fetch(`/cart/add/${bookId}/`, { method: 'POST', headers: {'X-CSRFToken': getCSRF()} });
+    if(res.ok){
+      const data = await res.json();
+      updateCartCount(data.total_items || 0);
+      showToast('Livre ajouté au panier');
+    } else showToast('Erreur lors de l\'ajout au panier', true);
+  });
+}
+
+// Commentaire
+document.getElementById('postCommentBtn').addEventListener('click', async () => {
+  const text = document.getElementById('newComment').value.trim();
+  const bookId = modal.dataset.bookId;
+  if (!bookId || !text) return;
+  try {
+    const res = await fetch(`/book/${bookId}/comment/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCSRF(), 'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `text=${encodeURIComponent(text)}`
+    });
+    if (res.ok) {
+      document.getElementById('newComment').value = '';
+      showToast('Commentaire publié');
+      const cl = document.getElementById('commentsList');
+      const commentDiv = document.createElement('div');
+      commentDiv.className = 'comment-item';
+      commentDiv.innerHTML = `<strong>Vous</strong> <small>À l'instant</small><div>${text}</div>`;
+      cl.prepend(commentDiv);
+    } else showToast('Erreur lors de la publication', true);
+  } catch (err) { showToast('Erreur réseau', true); }
+});
+
+// Toast & Cart helper
+function showToast(message, isError=false){
+  const c = document.getElementById('toast-container');
+  if(!c) return alert(message);
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.innerText = message;
+  c.appendChild(t);
+  setTimeout(()=>t.classList.add('show'), 10);
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 3500);
+}
+
+function updateCartCount(count){
+  const el = document.getElementById('cart-count');
+  if(el) el.innerText = count;
+}
+
+// Ajouter au panier depuis le modal (bouton spécifique)
+document.getElementById('modalAddToCart').addEventListener('click', async () => {
+  const bookId = modal.dataset.bookId;
+  if(!bookId) return;
+  try {
+    const res = await fetch(`/cart/add/${bookId}/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCSRF()}
+    });
+    if(res.ok){
+      const data = await res.json();
+      updateCartCount(data.total_items || 0);
+      showToast('Livre ajouté au panier');
+    } else showToast('Erreur lors de l\'ajout au panier', true);
+  } catch(err) { showToast('Erreur réseau', true); }
+});
+
+// Bouton Partager depuis le modal
+document.getElementById('modalShare').addEventListener('click', () => {
+  const url = window.location.origin + `/book/${modal.dataset.bookId}/`;
+  navigator.clipboard.writeText(url)
+    .then(() => showToast('Lien copié dans le presse-papiers !'))
+    .catch(() => showToast('Impossible de copier le lien', true));
+});
+
+</script>
+
+{% endblock %}

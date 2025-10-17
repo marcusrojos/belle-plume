@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Admin Dashboard - Ma Librairie{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+{% block content %}
+  <div class="admin-root">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>📚 Admin</h2>
+  <a href="{% url 'admin_dashboard' %}"><i class="fa fa-home"></i> Dashboard</a>
+  <a href="{% url 'admin_users' %}"><i class="fa fa-users"></i> Utilisateurs</a>
+  <a href="{% url 'admin_orders' %}"><i class="fa fa-box"></i> Commandes</a>
+  <a href="{% url 'admin_books' %}"><i class="fa fa-book"></i> Livres</a>
+  <a href="{% url 'admin_stats' %}"><i class="fa fa-chart-line"></i> Statistiques</a>
+  <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Déconnexion</a>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="admin-content">
+    {# Render Django messages as hidden elements for the admin toast helper #}
+    {% if messages %}
+      {% for message in messages %}
+        <div style="display:none" data-admin-message="{{ message|escape }}" data-admin-message-type="{{ message.tags }}"></div>
+      {% endfor %}
+    {% endif %}
+    <header>
+      <h1>Tableau de bord</h1>
+      <div class="search">
+        <input type="text" placeholder="Rechercher...">
+      </div>
+    </header>
+
+    <!-- Cartes résumé -->
+    <div class="cards">
+      <div class="card" style="border-left:5px solid #28a745;">
+        <h3>Ventes aujourd'hui</h3>
+        <p>{{ ventes_jour }} FCFA</p>
+      </div>
+      <div class="card" style="border-left:5px solid #007bff;">
+        <h3>Utilisateurs</h3>
+        <p>{{ nb_users }}</p>
+      </div>
+      <div class="card" style="border-left:5px solid #ff9800;">
+        <h3>Commandes en attente</h3>
+        <p>{{ commandes_attente }}</p>
+      </div>
+      <div class="card" style="border-left:5px solid #dc3545;">
+        <h3>Revenus totaux</h3>
+        <p>{{ revenus_totaux }} FCFA</p>
+      </div>
+    </div>
+
+    <!-- Formulaire ajout livre -->
+    {% if active_section == 'books' %}
+    <section class="add-book">
+      <h2>Ajouter un livre</h2>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Ajouter</button>
+      </form>
+    </section>
+
+    <!-- Liste des livres existants -->
+    <section class="books-list">
+      <h2>Livres existants</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Titre</th>
+            <th>Auteur</th>
+            <th>Prix</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for book in books %}
+          <tr>
+            <td>{{ book.id }}</td>
+            <td>{{ book.title }}</td>
+            <td>{{ book.author }}</td>
+            <td>{{ book.price }} FCFA</td>
+            <td>
+              <a href="{% url 'admin_book_edit' book.id %}" class="btn-edit" title="Modifier le livre">Modifier</a>
+              <form method="post" action="{% url 'admin_book_delete' book.id %}" class="needs-confirm" data-message="Supprimer le livre '{{ book.title }}' ?" style="display:inline">{% csrf_token %}<button type="submit" class="btn-delete">Supprimer</button></form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
+    {% if active_section == 'users' %}
+    <section>
+      <h2>Utilisateurs</h2>
+  <table>
+        <thead>
+          <tr><th>Username</th><th>Email</th><th>Staff</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for u in users_page %}
+          <tr>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{% if u.is_staff %}✓{% else %}—{% endif %}</td>
+            <td>
+              <form method="post" action="{% url 'admin_user_toggle' u.id %}" style="display:inline">{% csrf_token %}<button type="submit">Toggle staff</button></form>
+              <form method="post" action="{% url 'admin_user_delete' u.id %}" class="needs-confirm" data-message="Supprimer l'utilisateur {{ u.username }} ?" style="display:inline">{% csrf_token %}<button type="submit">Supprimer</button></form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="pagination">
+        {% if users_page.has_previous %}<a href="?page={{ users_page.previous_page_number }}">Préc.</a>{% endif %}
+        <span>Page {{ users_page.number }} / {{ users_page.paginator.num_pages }}</span>
+        {% if users_page.has_next %}<a href="?page={{ users_page.next_page_number }}">Suiv.</a>{% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- Stats circulaires -->
+    <div class="stats">
+      <div class="circle" data-percent="{{ percent_livrees }}" data-color="#28a745">
+        <svg width="140" height="140">
+          <circle class="bg" cx="70" cy="70" r="70"/>
+          <circle class="progress" cx="70" cy="70" r="70"/>
+        </svg>
+        <div class="percent">{{ percent_livrees }}%</div>
+        <p style="text-align:center">Commandes livrées</p>
+      </div>
+
+      <div class="circle" data-percent="{{ percent_paiements }}" data-color="#007bff">
+        <svg width="140" height="140">
+          <circle class="bg" cx="70" cy="70" r="70"/>
+          <circle class="progress" cx="70" cy="70" r="70"/>
+        </svg>
+        <div class="percent">{{ percent_paiements }}%</div>
+        <p style="text-align:center">Paiements réussis</p>
+      </div>
+
+      <div class="circle" data-percent="{{ percent_fideles }}" data-color="#ff9800">
+        <svg width="140" height="140">
+          <circle class="bg" cx="70" cy="70" r="70"/>
+          <circle class="progress" cx="70" cy="70" r="70"/>
+        </svg>
+        <div class="percent">{{ percent_fideles }}%</div>
+        <p style="text-align:center">Clients fidèles</p>
+      </div>
+    </div>
+
+  <!-- Graphique -->
+  <canvas id="salesChart" height="100"></canvas>
+  <script>
+    // Fetch real sales data from server
+    async function fetchSalesData() {
+      try {
+        const response = await fetch('/admin/sales-data/', { headers: {'X-Requested-With': 'XMLHttpRequest'} });
+        if (response.ok) {
+          return await response.json();
+        }
+      } catch (error) {
+        console.error('Error fetching sales data:', error);
+      }
+      // Fallback to placeholder data
+      return {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+        data: [500, 1200, 900, 1500, 2000, 1800]
+      };
+    }
+
+    // Initialize chart with real data
+    fetchSalesData().then(data => {
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: 'Ventes',
+            data: data.data,
+            borderColor: '#6B2F2F',
+            backgroundColor: 'rgba(107,47,47,0.2)',
+            fill: true,
+            tension: 0.4
+          }]
+        }
+      });
+    });
+  </script>
+
+    <!-- Tableau des commandes -->
+    <h2>Dernières commandes</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Livre</th>
+          <th>Montant</th>
+          <th>Statut</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in last_orders %}
+        <tr>
+          <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+          <td>
+            {% for item in order.items.all %}
+              <div>{{ item.book.title }} x{{ item.quantity }}</div>
+            {% endfor %}
+          </td>
+          <td>{{ order.total }} FCFA</td>
+          <td>
+            <form method="post" action="{% url 'admin_update_order_status' order.id %}">
+              {% csrf_token %}
+              <select name="status">
+                <option value="en attente" {% if order.status == 'en attente' %}selected{% endif %}>En attente</option>
+                <option value="livrée" {% if order.status == 'livrée' %}selected{% endif %}>Livrée</option>
+                <option value="annulée" {% if order.status == 'annulée' %}selected{% endif %}>Annulée</option>
+              </select>
+              <button type="submit">Mettre à jour</button>
+            </form>
+          </td>
+          <td>{{ order.created_at|date:'d/m/Y' }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Aucune commande récente.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <script>
+    // Progress circles
+    document.querySelectorAll('.circle').forEach(c => {
+      let percent = c.getAttribute('data-percent');
+      let color = c.getAttribute('data-color');
+      let circle = c.querySelector('.progress');
+      let radius = circle.r.baseVal.value;
+      let circumference = 2 * Math.PI * radius;
+      circle.style.strokeDasharray = circumference;
+      circle.style.strokeDashoffset = circumference;
+      circle.style.stroke = color;
+
+      setTimeout(() => {
+        circle.style.strokeDashoffset = circumference - (percent / 100) * circumference;
+      }, 200);
+    });
+
+    // Chart.js graphique
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+        datasets: [{
+          label: 'Ventes',
+          data: [500, 1200, 900, 1500, 2000, 1800],
+          borderColor: '#6B2F2F',
+          backgroundColor: 'rgba(107,47,47,0.2)',
+          fill: true,
+          tension: 0.4
+        }]
+      }
+    });
+  </script>
+
+  <!-- Modal de confirmation -->
+  <div id="confirm-modal" class="modal" aria-hidden="true" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <p id="confirm-message">Êtes-vous sûr ?</p>
+      <div class="modal-actions">
+        <button id="confirm-cancel">Annuler</button>
+        <button id="confirm-ok">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="admin-toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    (function(){
+      // Modal handling
+      const modal = document.getElementById('confirm-modal');
+      const msgEl = document.getElementById('confirm-message');
+      const btnCancel = document.getElementById('confirm-cancel');
+      const btnOk = document.getElementById('confirm-ok');
+      let activeForm = null;
+
+      document.querySelectorAll('form.needs-confirm').forEach(f => {
+        f.addEventListener('submit', function(e){
+          e.preventDefault();
+          activeForm = this;
+          const message = this.getAttribute('data-message') || 'Confirmer ?';
+          msgEl.textContent = message;
+          modal.style.display = 'block';
+          modal.setAttribute('aria-hidden', 'false');
+        });
+      });
+
+      btnCancel.addEventListener('click', ()=>{ modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); activeForm = null; });
+      btnOk.addEventListener('click', ()=>{ if(activeForm){ activeForm.submit(); } });
+
+      // Toast helper with type support
+      function showAdminToast(text, type='', timeout=3000){
+        const container = document.getElementById('admin-toast-container');
+        const t = document.createElement('div');
+        let cls = 'admin-toast';
+        if(type) cls += ' admin-toast--' + type;
+        t.className = cls;
+        t.textContent = text;
+        container.appendChild(t);
+        // animate in
+        setTimeout(()=>{ t.classList.add('show'); }, 10);
+        // remove after timeout
+        setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, timeout);
+      }
+
+      // Show messages passed from server via data attributes and apply type if present
+      document.querySelectorAll('[data-admin-message]').forEach(el=>{
+        const msg = el.getAttribute('data-admin-message');
+        const tags = (el.getAttribute('data-admin-message-type') || '').toLowerCase();
+        let type = '';
+        if(tags.includes('success')) type = 'success';
+        else if(tags.includes('error') || tags.includes('danger')) type = 'error';
+        else if(tags.includes('warning')) type = 'warning';
+        else if(tags.includes('info')) type = 'info';
+        showAdminToast(msg, type);
+      });
+    })();
+  </script>
+
+{% endblock %}

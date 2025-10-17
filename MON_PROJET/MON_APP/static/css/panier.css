@@ -1,0 +1,21 @@
+/* Styles pour la page panier.html */
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fdf8f2; margin: 0; padding: 0; color: #333; }
+header { background: #6B2F2F; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { margin: 0; font-size: 24px; }
+header nav a { color: white; text-decoration: none; margin-left: 20px; transition: 0.3s; }
+header nav a:hover { color: #FFD700; }
+.container { padding: 30px; max-width: 1000px; margin: auto; }
+h2 { text-align: center; margin-bottom: 20px; color: #5A2D0C; }
+.panier-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.2s; }
+.panier-item:hover { transform: scale(1.02); }
+.panier-item img { width: 80px; height: 120px; object-fit: cover; border-radius: 5px; }
+.item-info { flex: 1; margin-left: 15px; }
+.item-info h3 { margin: 0; font-size: 18px; }
+.item-info p { margin: 5px 0; font-size: 14px; color: #666; }
+.item-actions { display: flex; align-items: center; gap: 10px; }
+.qty { width: 50px; padding: 5px; text-align: center; }
+button { background: #8B4513; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+button:hover { background: #5A2D0C; }
+.total { text-align: right; margin-top: 30px; font-size: 20px; font-weight: bold; }
+.checkout { display: block; margin-left: auto; margin-top: 20px; background: #FFD700; color: #333; padding: 12px 20px; border-radius: 8px; font-size: 18px; font-weight: bold; transition: 0.3s; }
+.checkout:hover { background: #e6c200; }
